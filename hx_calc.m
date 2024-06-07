@@ -1,9 +1,10 @@
-%
+% Main Loop
 
-Tci = 20;
-Tco = 55;
+converged = 0.01;
+Tci = 20 + 273;
+Tco = 55 + 273;
 
-Thi = 61.2;
+T_sc_out = 61.2 + 273; % Set Solar Collector OUT!!!
 
 volume_min = 120*0.00378541;%m^3
 % Year,Month,Day,Hour,Minute,DHI,Temperature,Clearsky DHI,Clearsky DNI,Clearsky GHI,Cloud Type,Dew Point,DNI,GHI,Relative Humidity,Solar Zenith Angle,Surface Albedo,Pressure,Precipitable Water,Wind Direction,Wind Speed
@@ -12,42 +13,89 @@ volume_min = 120*0.00378541;%m^3
 data = extract_data();
 wind_speed = data(:,21);
 wind_dir = data(:,20);
-Ta = data(:,7);
+Ta = data(:,7) + 273;
 
 
-n = 0;% number of tubes
+n = 1;% number of tubes
 increase_area = true;
 conv = 0.01;
 
+eps = eps_req;
+
 while increase_area
     n = n+1;
+    disp(['n = ' num2str(n)])
     Ac = len_collector*n*len_tube;
-    
        
-    
-        % Assuming Ch = Cmin, 3.17.5 simplifies
-        Tho = Tco - eps_req*(Thi-Tci);
+        % Assuming Ch = Cmin, DB 3.17.5 simplifies
+        T_sc_in = T_sc_out - eps.*(T_sc_out-Tci);
 
         %Guess values to calculate m_dot_h
-        m_dot_h = 0.1;%kg/s
-        Tpm = (Thi+Tho)/2;
-        Tc1 = Tpm;
-        Tc2 = Tpm;
-
+        m_dot_sc = 0.1;%kg/s
+        m_dot_sc_old = 1;
+        Tpm = (T_sc_out+T_sc_in)/2;
+        Tpm_old = Tpm + 1;
+        Tc1 = Tpm-1;
+        Tc2 = Tpm-2;
+        i = 0;
+    %% Based on initial guesses, calculate Tpm and m_dot in solar collector
+    while any(abs(m_dot_sc-m_dot_sc_old) > converged) || any(abs(Tpm-Tpm_old) > converged)
+        i = i + 1;
+        disp(i);
         UL = UL_calc(Tc1,Tc2,Tpm);
 
-        hfi = hfi_calc(m_dot,Thi,Tho);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
+        hfi = hfi_calc(m_dot_sc,T_sc_out,T_sc_in);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
 
-        m = sqrt(UL/(k_c*delta));% DB 6.5.4a
-        F = tanh((m*(W-D)/2)/(m*(W-D)/2));% DB 
+        m = sqrt(UL./(k_c*delta));% DB 6.5.4a
+        F = tanh((m.*(W-D)./2)./(m.*(W-D)./2));% DB 6.5.12
         
+        tmp1 = 1./(UL.*(D + (W - D).*F));
+        tmp2 = 1./(pi.*D.*hfi);
+        F_prime = (1./UL)./(W.*(tmp1 + 1/Cb + tmp2));
+
+        FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
         
-        tmp1 = 1/(UL*(D + (W - D)*F));
-        tmp2 = 1/(pi*D*hfi);
-        F_prime = (1/UL)/(W*(tmp1 + 1/Cb + tmp2));
+        %update m_dot_h and Tpm
+        m_dot_sc_old = m_dot_sc;
+        Tpm_old = Tpm;
+
+        tmp3 = (T_sc_out - Ta - S./UL)./(T_sc_in - Ta - S./UL);
+        m_dot_sc = (-UL.*Ac.*F_prime./(log(tmp3)));% DB 6.6.4
 
 
+        Qu = Ac.*(S - UL.*(Tpm - Ta));% DB 6.9.3
+        Tpm = T_sc_in + (Qu/Ac).*(1-FR)./(FR.*UL);% DB 6.9.4
+        
+        Tpm = real(Tpm);
+        % for k = 1:length(Tpm)
+        %     if isnan(Tpm(k))
+        %         Tpm(k) = Ta(k);
+        %     end
+        % end
 
+        m_dot_sc = real(m_dot_sc);
+        for k = 1:length(m_dot_sc)
+            if m_dot_sc(k) < 0
+                m_dot_sc(k) = 0;
+            end
+            if isnan(m_dot_sc(k))
+                m_dot_sc(k) = 0;
+            end
+        end
+
+        disp(['Tpm = ' num2str(Tpm')])
+        disp(['m_dot_sc = ' num2str(m_dot_sc')])
+    end
+
+    [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc);
+    
+    % Check that initial assumption is met
+    if m_dot_he < m_dot_sc
+        disp('heat exchanger cold m_dot is less than hot m_dot. Increasing SC area')
+        continue %increase solar colector area
+    end
+
+    heated_volume = m_dot_he/rho_w*pi*D^2/4;
 
 
 
@@ -59,7 +107,7 @@ while increase_area
         increase_area = false;
     end
 end
-
+disp(Ac)
 
 
 

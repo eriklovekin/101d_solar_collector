@@ -17,9 +17,11 @@ collector_length = 2.5;
 bond_conductance = 10e6;
 plate_thickness = 0.0005;
 
+%% problem 1
+
 L = spacing; % plate to cover spacing
 ep= 0.096; % average plate emittance from hw 2
-Ta = data(:,7) + 273; % ambient temp
+Ta = data(:,7); % ambient temp
 windspeeds = data(:,end);
 Re = 1.232.*windspeeds.*collector_length/1.794e-5; % page 339
 % from 3.15.11/12:
@@ -33,17 +35,6 @@ end
 hw = KL_covers/collector_length^2.*Nu; % wind ht coefficient
 beta = 25.9; % collector tilt in deg, found in S calcs
 ec = 4*RI_covers/(RI_covers+1)^2; % glass cover emittance, find a credible source for this
-
-% %Check: hw3 p1 values {valid!}
-% L = 0.025; % plate to cover spacing
-% ep= 0.1; % plate emittance
-% Ta = 283.15; % ambient temp
-% hw = 10; % wind ht coefficient
-% Tpm = 373.15; % mean plate temp
-% beta = 45; % collector tilt in deg
-% ec = 0.8; % glass cover emittance
-% Tc1 = 350; % initial guess
-% Tc2 = 300; %initial guess
 
 Ut = 7; % initial guess
 Ut_new = 10;
@@ -102,6 +93,5 @@ end
 
 Ut_back = back_insulation_thickness/back_insulation_conductivity; % from 6.4.10, k/L
 UL = real(Ut_new+Ut_back);
-% UL = Ut_new;% hw1 check
 
 end
