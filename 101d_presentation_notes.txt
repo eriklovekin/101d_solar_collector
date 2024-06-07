@@ -1,0 +1,28 @@
+why using clearsky values for DHI, DNI
+
+solar azimuth angle equation 1.6.6
+
+calculate hour angles from given? Aren't hour angles 15 deg/hour away from noon
+
+what values were you getting for sunrise/sunset?
+	these only adjust the sunrise and sunset values
+
+step 10 middle which curve did you use?
+
+correction for sunrise increases irradiation?
+
+Total loss coefficient
+
+recalculating Tpm as well as tc1 and Tc2?
+	Solve for UL in an inner loop
+	Use to iterate on Tpm
+
+check for laminar/turbulent
+
+did you account for collector heating up losses?
+
+
+
+
+
+critical irradiance:

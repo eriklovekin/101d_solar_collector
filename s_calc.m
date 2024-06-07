@@ -22,7 +22,7 @@ Gsc = 1367; % W/m^2
 
 
 declination = 23.45*sind(360*(284+n_day)/365);% 1.6.1a, delta
-% omega = [-15*11:15:15*11]';% hour angle (15deg per hour off solar noon)
+omega = [-15*11:15:15*11]';% hour angle (15deg per hour off solar noon)
 % omega1_rise = omega(4);
 % omega2_rise = omega(5);
 % omega1_set = omega(19);
@@ -39,7 +39,8 @@ azimuth_s = sign(omega).*abs(acosd((cosd(zenith_sun).*sind(latitude)-sind(declin
 
 cosd_incidence_angle3 = cosd(zenith_sun)*cosd(beta) + sind(zenith_sun).*sind(beta).*cosd(azimuth_s - azimuth);%1.6.3 TODO: compare with 1.6.2
 incidence_angle = acosd(cosd_incidence_angle3);
-cosd_zenith_sun = cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%1.6.5
+% cosd_zenith_sun = cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%1.6.5
+cosd_zenith_sun = cosd(zenith_sun);
 Go = Gsc*(1 + 0.033*cosd(360*n_day/365).*cosd(zenith_sun));%1.10.1
 
 Id = DHI*3600;%diffuse
@@ -98,7 +99,7 @@ tau_alpha_g = tau_alpha_n*0.36;
 tau_alpha_b = tau_alpha_n*[0;0;0;0;0;0.1;0.55;0.82;0.95;0.98;0.99;1;0.99;0.98;0.96;0.89;0.64;0.18;0;0;0;0;0];
 
 S = Ib.*Rb.*tau_alpha_b + Id.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*I.*tau_alpha_g.*(1-cosd(beta)).*0.5;%5.9.1
-
+S = S/3600;
 
 
 
