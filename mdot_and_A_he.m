@@ -7,5 +7,5 @@ function [mdot_he,maxA,eps] = mdot_and_A_he(eps,mdot_sc)
     A=Ntu.*mdot_he.*4180./U; % from 3.17.8; 4180 from lookup table
     maxA=max(A);
     Ntu=maxA./mdot_he./4180.*U;
-    eps=(Rc-exp((1-Rc).*Ntu))./(1-exp((1-Rc).*Ntu));% DB 3.17.8 and BHT Table 8.3b
+    eps=(1-exp((1-Rc).*Ntu))./(Rc-exp((1-Rc).*Ntu));% DB 3.17.8 and BHT Table 8.3b
 end
