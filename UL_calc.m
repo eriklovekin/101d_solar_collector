@@ -1,7 +1,8 @@
-function UL = UL_calc(Tc1,Tc2,Tpm,Ac)
+function UL = UL_calc(Tc1,Tc2,Tpm)
 
 data = extract_data();
 
+% just all of the potentially relevant things
 n_covers = 2;
 n_tubes = 2; % starting with 2
 KL_covers = .0125;
@@ -35,9 +36,6 @@ hw = KL_covers/collector_length^2.*Nu; % wind ht coefficient
 coltilt = 25.9; % collector tilt in deg, found in S calcs
 ec = 4*RI_covers/(RI_covers+1)^2; % glass cover emittance, find a credible source for this
 
-Tpm = 373.15; % guessing mean plate temp
-Tc1 = 350; % initial guess
-Tc2 = 300; %initial guess
 Ut = 7; % initial guess
 Ut_new = 10;
 
@@ -93,7 +91,7 @@ end
         htc = (5.67e-8.*(T2.^2+T1.^2).*(T2+T1))./((1-eps1)./eps1+1+(1-eps2)./eps2);
     end
 
-Ut_back = back_insulation_thickness/back_insulation_conductivity % from 6.4.10, k/L
+Ut_back = back_insulation_thickness/back_insulation_conductivity; % from 6.4.10, k/L
 
 return real(Ut_new+Ut_back)
 
