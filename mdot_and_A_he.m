@@ -1,11 +1,11 @@
-function [m_dot_he,maxA,eps] = mdot_and_A_he(eps,m_dot_sc)
+function [m_dot_he,maxA,eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out)
 %% Calculate m_dot_he (cold side of HE), Area of heat exchanger, and update eps values for this new area
     [n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C_b,L_plate,U,eps_req,cp_w,rho_w,mu_w,nu_w,Pr_w,k_w,k_c] = given_vals();
-    T_sc_out = 61.3 + 273;
-    T_he_in = 20 + 273;
-    T_he_out = 55 + 273;
+    % T_sc_out = 61.3 + 273;
+    Tci = 20 + 273;
+    Tco = 55 + 273;
 
-    m_dot_he = m_dot_sc.*eps.*(T_sc_out-T_he_in)./(T_he_out-T_he_in); % DB 3.17.5
+    m_dot_he = m_dot_sc.*eps.*(T_sc_out-Tci)./(Tco-Tci); % DB 3.17.5
 
     Rc = m_dot_sc./m_dot_he; % BHT 8.34
     for k = 1:length(Rc)
