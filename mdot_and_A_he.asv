@@ -24,7 +24,9 @@ function [mdot_he,maxA,eps] = mdot_and_A_he(eps,mdot_sc)
             A(k) = 0;
         end
     end
-    [maxA, max_location]=max(A); % TODO: should always be at noon, but isn't in i = 4 and a few others. Hardcode to be at noon.
+    [maxA, max_location]=max(A); % should always be at 
+    disp(max_location)
+    
     Ntu=A(12)./mdot_he./4180.*U;
     Ntu = real(Ntu);
     for k = 1:length(Ntu)
@@ -42,5 +44,5 @@ function [mdot_he,maxA,eps] = mdot_and_A_he(eps,mdot_sc)
         eps(k) = 1;
         end
     end
-    % disp([Rc(12),Ntu1(12),Ntu(12),mdot_he(12),A(12),maxA,max_location,eps(12),min(eps)])
+    disp([Rc(12),Ntu1(12),Ntu(12),mdot_he(12),A(12),maxA,eps(12)])
 end

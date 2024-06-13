@@ -12,7 +12,7 @@ function [n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C
     len_tube = 2.46;%tube length
     diam_tube = 0.015;%tube diameter
     len_collector = 2.5;%collector gross length
-    C_b = 1e6;%bond conductance between tubes and absorber
+    C_b = 1e7;%bond conductance between tubes and absorber
     L_plate = 5e-4;%absorber plate thickness
     U = 500;%overall heat exchanger coefficient
     eps_req = 0.85;%required effectiveness at every hour

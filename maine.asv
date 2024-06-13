@@ -25,7 +25,7 @@ while increase_area
     % Increase area
     n = n+1;
     disp(['n = ' num2str(n)])
-    Ac = len_collector*n*W;
+    Ac = len_collector*n*len_tube;
 
     eps = eps_req;% Reset effectiveness requirement to eps_req
        
@@ -84,7 +84,7 @@ while increase_area
         Tpm = real(Tpm);
         for k = 1:length(Tpm)
             if m_dot_sc(k) == 0 % If no flow, Tpm = Ta
-                Tpm(k) = Ta(k);
+                Tpm(k) = 0;
             end
             if Tpm(k) < 0
                 Tpm(k) = Ta(k);
@@ -180,9 +180,8 @@ while increase_area
     %     disp(['m_dot_sc at noon = ' num2str(m_dot_sc(12)')])
     % end
 
-
-    heated_volume = sum(m_dot_he./rho_w);%.*pi*D^2/4);
-
+    
+    heated_volume = m_dot_he/rho_w*pi*D^2/4;
     disp(['Hot water produced: ' num2str(heated_volume)])
     if heated_volume >= volume_min
         increase_area = false;

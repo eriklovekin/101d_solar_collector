@@ -1,0 +1,19 @@
+n = 0
+while increase_area
+	n = n + 1
+	eps = 0.85
+	while m_dot_sc not converged
+		calc T_scin from eps
+		Guess m_dot_sc, Tpm, Tc1, Tc2
+		while not m_dot_sc, Tpm not converged
+			Iterate for UL at Tpm
+				update UL, Tc1, Tc2 (as in hw3)
+			Using converged UL, recalc m_dot_sc, Tpm
+		Using m_dot_sc, calc m_dot_hx, A_hx
+		if m_dot_hx < m_dot_sc (check initial assumption)
+			break to outermost loop (increase tube number)
+		A_hx = max(A_hx)
+		recalc eps from A_hx
+	Check volume requirement
+		if good, dope
+		if not, start from the beginning

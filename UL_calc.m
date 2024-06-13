@@ -1,27 +1,27 @@
 function UL = UL_calc(Tc1,Tc2,Tpm)
 
 data = extract_data();
+[n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C_b,L_plate,U,eps_req,cp_w,rho_w,mu_w,nu_w,Pr_w,k_w,k_c] = given_vals()
 
-% just all of the potentially relevant things
-n_covers = 2;
-n_tubes = 2; % starting with 2
-KL_covers = .0125;
-RI_covers = 1.526; % refractive index
-back_insulation_thickness = .007;
-back_insulation_conductivity = .0245;
-spacing = 0.025;
-tube_distance = 0.115;
-tube_length = 2.46;
-tube_diameter = 0.015; % thin walled
-collector_length = 2.5;
-bond_conductance = 10e6;
-plate_thickness = 0.0005;
+% n_covers = 2;
+% n_tubes = 2; % starting with 2
+% KL_covers = .0125;
+% n_ri = 1.526; % refractive index
+% back_insulation_thickness = .007;
+% back_insulation_conductivity = .0245;
+% spacing = 0.025;
+% tube_distance = 0.115;
+% tube_length = 2.46;
+% tube_diameter = 0.015; % thin walled
+% len_collector = 2.5;
+% bond_conductance = 10e6;
+% plate_thickness = 0.0005;
 
-L = spacing; % plate to cover spacing
+L = L_cover; % plate to cover spacing
 ep= 0.096; % average plate emittance from hw 2
 Ta = data(:,7) + 273; % ambient temp
 windspeeds = data(:,end);
-Re = 1.232.*windspeeds.*collector_length/1.794e-5; % page 339
+Re = 1.232.*windspeeds.*len_collector/1.794e-5; % page 339
 % from 3.15.11/12:
 if Re(:)<1000
     Nu = .4+.54.*Re.^.52;
@@ -30,9 +30,9 @@ elseif Re(:)>1000
 else
     fprintf("damn.")
 end
-hw = KL_covers/collector_length^2.*Nu; % wind ht coefficient
+hw = kl/len_collector^2.*Nu; % wind ht coefficient
 beta = 25.9; % collector tilt in deg, found in S calcs
-ec = 4*RI_covers/(RI_covers+1)^2; % glass cover emittance, find a credible source for this
+ec = 4*n_ri/(n_ri+1)^2; % glass cover emittance, find a credible source for this
 
 % %Check: hw3 p1 values {valid!}
 % L = 0.025; % plate to cover spacing
@@ -100,7 +100,7 @@ end
         htc = (5.67e-8.*(T2.^2+T1.^2).*(T2+T1))./((1-eps1)./eps1+1+(1-eps2)./eps2);
     end
 
-Ut_back = back_insulation_thickness/back_insulation_conductivity; % from 6.4.10, k/L
+Ut_back = L_back/k_back; % from 6.4.10, k/L
 UL = real(Ut_new+Ut_back);
 % UL = Ut_new;% hw1 check
 
