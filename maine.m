@@ -113,8 +113,8 @@ while increase_area
             end
         end
 
-        disp('     UL        hfi       m         F        F_prime    FR       Qu       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
-        disp([UL,hfi,m,F,F_prime,FR,Qu,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
+        disp('     UL        hfi       m         F        F_prime    FR       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
+        disp([UL,hfi,m,F,F_prime,FR,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
         % disp(['Ahe = ' num2str(Ahe)])
         % Check that initial assumption is met
         if m_dot_he < m_dot_sc

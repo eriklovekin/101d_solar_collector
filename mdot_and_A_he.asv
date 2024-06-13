@@ -4,13 +4,11 @@ function [m_dot_he,maxA,eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out)
     % T_sc_out = 61.3 + 273;
     Tci = 20 + 273;
     Tco = 55 + 273;
-    m_dot_he = m_dot_sc.*eps.*(T_sc_out-Tci)./(Tco-Tci); % DB 3.17.5
+    m_dot_he = ones(23,1);
     m_dot_he_old = zeros(23,1);
-    i = 0;
-    while any(abs(m_dot_he-m_dot_he_old) > 0.0001)
-        i = i+1;
-        disp(['he loop ' num2str(i)])
-        disp(m_dot_he')
+    while any(abs(m_dot_he-m_dot_he_old) > 0.01)
+        m_dot_he = m_dot_sc.*eps.*(T_sc_out-Tci)./(Tco-Tci); % DB 3.17.5
+    
         Rc = m_dot_sc./m_dot_he; % BHT 8.34
         for k = 1:length(Rc)
                 if isnan(Rc(k))
@@ -53,8 +51,6 @@ function [m_dot_he,maxA,eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out)
             end
         end
         % disp([Rc(12),Ntu1(12),Ntu(12),m_dot_he(12),A(12),maxA,max_location,eps(12),min(eps)])
-        
-        m_dot_he_old = m_dot_he;
-        m_dot_he = m_dot_sc.*eps.*(T_sc_out-Tci)./(Tco-Tci); % DB 3.17.5
+
     end
 end
