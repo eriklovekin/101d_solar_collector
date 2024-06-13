@@ -19,7 +19,7 @@ Ta = data(:,7) + 273;
 n = 1;% number of tubes
 increase_area = true;
 
-S = s_calc();
+S = zs_calc();
 
 while increase_area
     % Increase area

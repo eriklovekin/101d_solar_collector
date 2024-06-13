@@ -1,0 +1,25 @@
+data = extract_data();
+DNI = data(:,9);
+n = day(datetime(2021,6,21),'dayofyear');
+
+Gsc = 1367; % known, W/m^2
+G0 = Gsc*(1+0.033*cosd(360*n/365))*cosd(0); % from section 1.10a
+
+delta = 23.45*sind(360*(284+n)/365); % from 1.6.1a
+lat = 47.6205; % latitude of space needle 
+w = -165:15:165;
+
+az_angle = cos(lat)*os
+
+% Calculate Anisotropy Index (Ai)
+Ai = DNI ./ G0;
+
+% Display the result
+disp('Anisotropy Index (Ai) values:');
+disp(Ai);
+
+beta = 25.9; % calculated
+
+
+%S = (Ib+Id.*Ai).*Rb.*tau_alpha_b+Id.*(1-Ai).*tau_alpha_d.*((1+cosd(beta))./2).*(1+f.*sind(beta./2).^3)+I.*rho_g.*tau_alpha_g.*((1-cosd(beta))./2);
+% S = S/3600;
