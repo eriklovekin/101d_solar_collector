@@ -19,7 +19,7 @@ Ta = data(:,7) + 273;
 n = 1;% number of tubes
 increase_area = true;
 
-S = zs_calc();
+S = s_calc();
 
 while increase_area
     % Increase area
@@ -53,7 +53,7 @@ while increase_area
         % UL = UL_calc(Tc1,Tc2,Tpm);
         UL = UL_calc_solution(Tc1,Tc2,Tpm);
 
-        hfi = hfi_calc(m_dot_sc,T_sc_out,T_sc_in);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
+        hfi = hfi_calc(m_dot_sc);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
 
         m = sqrt(UL./(k_c*delta));% DB 6.5.4a
         F = tanh(m.*(W-D)./2)./(m.*(W-D)./2);% DB 6.5.12 standard fin efficiency
@@ -99,7 +99,7 @@ while increase_area
             end
         end
 
-        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc);
+        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out);
         for k = 1:length(eps)
             if isnan(eps(k))
                 eps(k) = 1;
