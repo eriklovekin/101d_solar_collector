@@ -4,7 +4,7 @@ converged = 0.1;
 Tci = 20 + 273;% Heat exchanger cold side in temp
 Tco = 55 + 273;% Heat exchanger cold side out temp
 
-T_sc_out = (62 + 273)*ones([23,1]); % Set Solar Collector OUT!!!
+T_sc_out = (61.2 + 273)*ones([23,1]); % Set Solar Collector OUT!!!
 
 volume_min = 120*0.00378541;%m^3
 
@@ -53,7 +53,7 @@ while increase_area
         % UL = UL_calc(Tc1,Tc2,Tpm);
         UL = UL_calc_solution(Tc1,Tc2,Tpm);
 
-        hfi = hfi_calc(m_dot_sc);% convective heat transfer coefficient inside tube
+        hfi = hfi_calc(m_dot_sc,T_sc_out,T_sc_in);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
 
         m = sqrt(UL./(k_c*delta));% DB 6.5.4a
         F = tanh(m.*(W-D)./2)./(m.*(W-D)./2);% DB 6.5.12 standard fin efficiency
@@ -62,14 +62,13 @@ while increase_area
         tmp2 = 1./(pi.*D.*hfi);
         F_prime = (1./UL)./(W.*(tmp1 + 1/Cb + tmp2));% DB 6.5.18
 
-        % FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
-        % for k = 1:length(FR)
-        %     if FR(k) < 0
-        %         FR(k) = 0;
-        %     end
-        % end
-
-        %% update m_dot_sc and Tpm
+        FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
+        for k = 1:length(FR)
+            if FR(k) < 0
+                FR(k) = 0;
+            end
+        end
+        %update m_dot_h and Tpm
         m_dot_sc_old = m_dot_sc;
         Tpm_old = Tpm;
 
@@ -85,36 +84,29 @@ while increase_area
                 m_dot_sc(k) = 0;
             end
         end
-
-        FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
-        for k = 1:length(FR)
-            if FR(k) < 0
-                FR(k) = 0;
-            end
-        end
+        
+        % Qu = Ac.*(S - UL.*(Tpm - Ta));% DB 6.9.3
         Qu = Ac.*FR.*(S - UL.*(T_sc_in - Ta));% 6.7.6
         Tpm = T_sc_in + (Qu/Ac).*(1-FR)./(FR.*UL);% DB 6.9.4
         
         Tpm = real(Tpm);
         for k = 1:length(Tpm) % clean up Tpm
             if Tpm(k) < 0
-                Tpm(k) = 0;
+                Tpm(k) = 1;
             end
             if isnan(Tpm(k))
-                Tpm(k) = 0;
+                Tpm(k) = 2;
             end
         end
 
-        %% Calculate Heat exchanger values 
-        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out);
+        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc);
         for k = 1:length(eps)
             if isnan(eps(k))
                 eps(k) = 1;
             end
         end
-
-        disp('     UL        hfi       m         F        F_prime    FR       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
-        disp([UL,hfi,m,F,F_prime,FR,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
+        disp('     UL        hfi       m         F        F_prime    FR       Qu       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
+        disp([UL,hfi,m,F,F_prime,FR,Qu,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
         % disp(['Ahe = ' num2str(Ahe)])
         % Check that initial assumption is met
         if m_dot_he < m_dot_sc
