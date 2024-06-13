@@ -75,7 +75,7 @@ while (1)
         Tc1=real(Tp-qloss./h3);
         Tc2=real(Tc1-qloss./h2);
 
-        % disp([Tc1, Tc2])
+        
         if all(abs(Tc1-Tc1int)<conv)
             Tc1int=Tc1;
             break
@@ -91,7 +91,7 @@ while (1)
         Tc2int=Tc2;
         j=j+1;
     end
-
+    % disp([Tc1, Tc2])
     Ub = k_back./L_back;
     UL = real(Ut + Ub);
 end
