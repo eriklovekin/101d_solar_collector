@@ -1,5 +1,5 @@
 %% Calculate hfi
-function hfi = hfi_calc(m_dot_sc,T_sc_out,T_sc_in)
+function hfi = hfi_calc(m_dot_sc)
     [n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C_b,L_plate,U,eps_req,cp_w,rho_w,mu_w,nu_w,Pr_w,k_w,k_c] = given_vals();
     % Get water values from temp, for now assume constant
     nu = nu_w;
