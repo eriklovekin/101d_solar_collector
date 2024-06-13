@@ -36,26 +36,32 @@ function S = s_calc()
     %                      + cosd(declination).*sind(beta).*sind(azimuth).*sind(omega);%1.6.2
     
     azimuth_s = sign(omega).*abs(acosd((cosd(zenith_sun).*sind(latitude)-sind(declination))...
-                                            ./(sind(zenith_sun).*cosd(latitude)))); %1.6.6
+                                            ./(sind(zenith_sun).*cosd(latitude)))); %1.6.6, solar azimuth angle
     
     cosd_incidence_angle3 = cosd(zenith_sun)*cosd(beta) + sind(zenith_sun).*sind(beta).*cosd(azimuth_s - azimuth);%1.6.3 TODO: compare with 1.6.2
     incidence_angle = acosd(cosd_incidence_angle3);
     % cosd_zenith_sun = cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%1.6.5
     cosd_zenith_sun = cosd(zenith_sun);
-    Go = Gsc*(1 + 0.033*cosd(360*n_day/365).*cosd(zenith_sun));%1.10.1
+    Go = Gsc*(1 + 0.033*cosd(360*n_day/365)).*cosd(zenith_sun);%1.10.1
     
     Id = DHI*3600;%diffuse
     Ib = DNI*3600;%beam
     Io = Go*3600;%extraterrestrial
     I = Ib + Id; %TODO: check
     
-    Ai = Ib./Io;% 2.16.3 anisotropy index
-    f = sqrt(Ib./I);%2.16.6
+    Ai = Ib./Io;%DB 2.16.3 anisotropy index
+    f = sqrt(Ib./I);%DB 2.16.6
+    for n = 1:length(f)
+        if isnan(f(n))
+            f(n) = 0;
+        end
+    end
+
     
     %% Ratio between incident radiation on horizontal and tilted surface
-    % R_b1 = cosd_incidence_angle3./cosd(zenith_sun); %1.8.1
+    % R_b1 = cosd_incidence_angle3./cosd(zenith_sun); %DB 1.8.1
     R_b2 = (cosd(latitude-beta).*cosd(declination).*cosd(omega) + sind(latitude-beta).*sind(declination))...
-            ./ cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);% 1.8.2 TODO: Doesn't match with 1.8.1
+            ./ cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%DB 1.8.2 TODO: Doesn't match with 1.8.1
     
     % Account for sun rise/set
     % a_rise = (sind(declination).*sind(latitude).*cosd(beta) - sind(declination).*cosd(latitude).*sind(beta).*cosd(azimuth)).*(omega2_rise-omega1_rise).*pi/180 ...
@@ -84,19 +90,20 @@ function S = s_calc()
     %% Absorbtance and transmittance calcs
     %from HW2 P1, assume T = 400K 
     alpha_n = 0.944;%fig 4.8.3 plate absorbtance
-    eps = 0.095;%4.8.3 plate emissivity
+    alpha_n = 0.961;
+    eps = 0.095;% DB 4.8.3 plate emissivity
     
-    %fig. 5.4.1
+    %DB fig. 5.4.1
     theta_ed = 58;%effective angle of incidence for diffuse sky radiation
     theta_eg = 76.5;%ground reflected radiation
     
-    tau_alpha_n = 1.01*0.83*alpha_n;%5.5.2, fig 5.3.1
+    tau_alpha_n = 1.01*0.83*alpha_n;%DB 5.5.2, fig 5.3.1 --> tau = 0.83
     
     tau_b = [0;0;0;0;0;0.17;0.55;0.75;0.82;0.83;0.83;0.83;0.83;0.83;0.82;0.77;0.61;0.28;0;0;0;0;0];%fig 5.3.1 transmittance from solar incidence angle
     
     %fig 5.6.1
-    tau_alpha_d = tau_alpha_n*0.84;
-    tau_alpha_g = tau_alpha_n*0.36;
+    tau_alpha_d = tau_alpha_n*0.84;% diffuse using theta_ed
+    tau_alpha_g = tau_alpha_n*0.36;% ground reflected using theta_eg
     tau_alpha_b = tau_alpha_n*[0;0;0;0;0;0.1;0.55;0.82;0.95;0.98;0.99;1;0.99;0.98;0.96;0.89;0.64;0.18;0;0;0;0;0];
     
     S = Ib.*Rb.*tau_alpha_b + Id.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*I.*tau_alpha_g.*(1-cosd(beta)).*0.5;%5.9.1

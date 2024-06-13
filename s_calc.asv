@@ -36,7 +36,7 @@ function S = s_calc()
     %                      + cosd(declination).*sind(beta).*sind(azimuth).*sind(omega);%1.6.2
     
     azimuth_s = sign(omega).*abs(acosd((cosd(zenith_sun).*sind(latitude)-sind(declination))...
-                                            ./(sind(zenith_sun).*cosd(latitude)))); %1.6.6
+                                            ./(sind(zenith_sun).*cosd(latitude)))); %1.6.6, solar azimuth angle
     
     cosd_incidence_angle3 = cosd(zenith_sun)*cosd(beta) + sind(zenith_sun).*sind(beta).*cosd(azimuth_s - azimuth);%1.6.3 TODO: compare with 1.6.2
     incidence_angle = acosd(cosd_incidence_angle3);

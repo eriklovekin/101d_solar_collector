@@ -1,7 +1,7 @@
 function UL = UL_calc(Tc1,Tc2,Tpm)
 
 data = extract_data();
-[n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C_b,L_plate,U,eps_req,cp_w,rho_w,mu_w,nu_w,Pr_w,k_w,k_c] = given_vals()
+[n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C_b,L_plate,U,eps_req,cp_w,rho_w,mu_w,nu_w,Pr_w,k_w,k_c] = given_vals();
 
 % n_covers = 2;
 % n_tubes = 2; % starting with 2
@@ -17,33 +17,37 @@ data = extract_data();
 % bond_conductance = 10e6;
 % plate_thickness = 0.0005;
 
-L = L_cover; % plate to cover spacing
-ep= 0.096; % average plate emittance from hw 2
-Ta = data(:,7) + 273; % ambient temp
-windspeeds = data(:,end);
-Re = 1.232.*windspeeds.*len_collector/1.794e-5; % page 339
-% from 3.15.11/12:
-if Re(:)<1000
-    Nu = .4+.54.*Re.^.52;
-elseif Re(:)>1000
-    Nu = 0.30.*Re.^.6;
-else
-    fprintf("damn.")
-end
-hw = kl/len_collector^2.*Nu; % wind ht coefficient
-beta = 25.9; % collector tilt in deg, found in S calcs
-ec = 4*n_ri/(n_ri+1)^2; % glass cover emittance, find a credible source for this
+% rho_air = 1.225;%kg/m^3 Source: https://www.aerodynamics4students.com/properties-of-the-atmosphere/sea-level-conditions.php
+% mu_air = 1.789e-5;% kg/m/s
+% 
+% L = L_cover; % plate to cover spacing
+% ep= 0.096; % average plate emittance from hw 2
+% Ta = data(:,7) + 273; % ambient temp
+% V = data(:,21); %windspeed
+% Re = rho_air.*V.*len_collector/mu_air; % DB page 330
+% % from 3.15.11/12:
+% if Re(:)<1000
+%     Nu = .4+.54.*Re.^.52;
+% else% Re(:)>1000
+%     Nu = 0.30.*Re.^.6;
+% end
+% % hw = kl/len_collector^2.*Nu; % wind ht coefficient
+% for k = 1:length(V)
+%     hw(k,1) = max([5,8.6.*V(k).^0.6/len_collector.^0.4]);% DB 3.15.10
+% end
+% beta = 25.9; % collector tilt in deg, found in S calcs
+% ec = 4*n_ri/(n_ri+1)^2; % glass cover emittance, TODO: find a credible source for this
 
 % %Check: hw3 p1 values {valid!}
-% L = 0.025; % plate to cover spacing
-% ep= 0.1; % plate emittance
-% Ta = 283.15; % ambient temp
-% hw = 10; % wind ht coefficient
-% Tpm = 373.15; % mean plate temp
-% beta = 45; % collector tilt in deg
-% ec = 0.8; % glass cover emittance
-% Tc1 = 350; % initial guess
-% Tc2 = 300; %initial guess
+L = 0.025; % plate to cover spacing
+ep= 0.1; % plate emittance
+Ta = 283.15; % ambient temp
+hw = 10; % wind ht coefficient
+Tpm = 373.15; % mean plate temp
+beta = 45; % collector tilt in deg
+ec = 0.8; % glass cover emittance
+Tc1 = 350; % initial guess
+Tc2 = 300; %initial guess
 
 Ut = 7; % initial guess
 Ut_new = 10;
@@ -51,6 +55,7 @@ Ut_new = 10;
 % use this guess to find HT coeffs
 
 while abs(Ut_new-Ut)>0.01
+    % disp('UL_calc')
     Ut = Ut_new;
     hrpc1=htcoeff(Tpm,Tc1,ep,ec);
     Ra = 9.81.*0.00367.*(Tpm-Tc1).*L^3./15.06e-6./21.7e-6;
@@ -100,8 +105,9 @@ end
         htc = (5.67e-8.*(T2.^2+T1.^2).*(T2+T1))./((1-eps1)./eps1+1+(1-eps2)./eps2);
     end
 
-Ut_back = L_back/k_back; % from 6.4.10, k/L
+% Ut_back = L_back/k_back; % from 6.4.10, k/L
+Ut_back = k_back/L_back;
 UL = real(Ut_new+Ut_back);
-% UL = Ut_new;% hw1 check
+UL = Ut_new;% hw1 check
 
 end

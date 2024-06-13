@@ -27,7 +27,7 @@ while increase_area
     disp(['n = ' num2str(n)])
     Ac = len_collector*n*W;
 
-    eps = eps_req;% Reset effectiveness requirement to eps_req
+    eps = eps_req*ones(23,1);% Reset effectiveness requirement to eps_req
        
     % Assuming Ch = Cmin, DB 3.17.5 simplifies
     T_sc_in = T_sc_out - eps.*(T_sc_out-Tci);
@@ -37,8 +37,8 @@ while increase_area
     m_dot_sc_old = 1;
     Tpm = (T_sc_out+T_sc_in)/2;% mean plate temp
     Tpm_old = Tpm + 1;
-    Tc1 = Tpm-5;% cover 1 temp
-    Tc2 = Tpm-7;% cover 2 temp
+    Tc2 = (Ta+Tpm)./2;
+    Tc1 = (Tc2+Tpm)./2;
     i = 0;
 
     % disp('   [Rc       Ntu1        Ntu      mdot_he      A       maxA     maxA_loc    eps12  min_eps]') %Legend for mdot_and_A_he display
@@ -46,28 +46,33 @@ while increase_area
     while any(abs(m_dot_sc-m_dot_sc_old) > converged) || any(abs(Tpm-Tpm_old) > converged)
         i = i + 1;
         disp(i);
-        disp('     m_dot_he   eps     Tpm')
-        UL = UL_calc(Tc1,Tc2,Tpm);
+        
+        % UL = UL_calc(Tc1,Tc2,Tpm);
+        UL = UL_calc_solution(Tc1,Tc2,Tpm);
 
         hfi = hfi_calc(m_dot_sc,T_sc_out,T_sc_in);% convective heat transfer coefficient inside tube (doesn't use Thi,Tho currently)
 
         m = sqrt(UL./(k_c*delta));% DB 6.5.4a
-        F = tanh((m.*(W-D)./2)./(m.*(W-D)./2));% DB 6.5.12 standard fin efficiency
+        F = tanh(m.*(W-D)./2)./(m.*(W-D)./2);% DB 6.5.12 standard fin efficiency
         
         tmp1 = 1./(UL.*(D + (W - D).*F));
         tmp2 = 1./(pi.*D.*hfi);
         F_prime = (1./UL)./(W.*(tmp1 + 1/Cb + tmp2));% DB 6.5.18
 
         FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
-        
+        for k = 1:length(FR)
+            if FR(k) < 0
+                FR(k) = 0;
+            end
+        end
         %update m_dot_h and Tpm
         m_dot_sc_old = m_dot_sc;
         Tpm_old = Tpm;
 
         tmp3 = (T_sc_out - Ta - S./UL)./(T_sc_in - Ta - S./UL);
-        m_dot_sc = (-UL.*Ac.*F_prime./(log(tmp3)*cp_w));% DB 6.6.4
+        m_dot_sc = (-UL.*Ac.*F_prime)./(log(tmp3)*cp_w);% DB 6.6.4
 
-        m_dot_sc = real(m_dot_sc);
+        m_dot_sc = real(m_dot_sc);% clean up m_dot_sc
         for k = 1:length(m_dot_sc)
             if m_dot_sc(k) < 0
                 m_dot_sc(k) = 0;
@@ -82,15 +87,12 @@ while increase_area
         Tpm = T_sc_in + (Qu/Ac).*(1-FR)./(FR.*UL);% DB 6.9.4
         
         Tpm = real(Tpm);
-        for k = 1:length(Tpm)
-            if m_dot_sc(k) == 0 % If no flow, Tpm = Ta
-                Tpm(k) = Ta(k);
-            end
+        for k = 1:length(Tpm) % clean up Tpm
             if Tpm(k) < 0
-                Tpm(k) = Ta(k);
+                Tpm(k) = 1;
             end
             if isnan(Tpm(k))
-                Tpm(k) = Ta(k);
+                Tpm(k) = 2;
             end
         end
 
@@ -100,6 +102,7 @@ while increase_area
                 eps(k) = 1;
             end
         end
+        disp('     m_dot_he   eps     Tpm')
         disp([m_dot_he,eps,Tpm])
         % disp(['Ahe = ' num2str(Ahe)])
         % Check that initial assumption is met
@@ -108,14 +111,14 @@ while increase_area
             break %increase solar colector area
         end
 
-    %% Using Largest Ahe value and effectiveness, recalc m_dot_he
-    % Assuming Ch = Cmin, DB 3.17.5 simplifies
-    T_sc_in = T_sc_out - eps.*(T_sc_out-Tci);
-    Tc1 = Tpm-5;% cover 1 temp
-    Tc2 = Tpm-7;% cover 2 temp
-
-        % disp(['Tpm = ' num2str(Tpm')])
-        % disp(['m_dot_sc = ' num2str(m_dot_sc')])
+        %% Using updated eps values, recalc T_sc_in and guess new cover temps
+        % Assuming Ch = Cmin, DB 3.17.5 simplifies
+        T_sc_in = T_sc_out - eps.*(T_sc_out-Tci);
+        Tc2 = (Ta+Tpm)./2;
+        Tc1 = (Tc2+Tpm)./2;
+    
+            % disp(['Tpm = ' num2str(Tpm')])
+            % disp(['m_dot_sc = ' num2str(m_dot_sc')])
     end
 
 

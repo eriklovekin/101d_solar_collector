@@ -21,7 +21,7 @@ function UL = UL_calc_solution(Tc1,Tc2,Tpm)
     for m = 1:length(V)
         hw(m,1) = max([5,8.6.*V(m).^0.6./len_collector.^0.4]);% DB 3.15.10
     end
-    disp('UL_calc')
+    % disp('UL_calc')
 
     % % From HW3p1, returns UL = Ut = 2.3349 as in hw solution
     % Ts=10+273;% sky T
@@ -48,7 +48,7 @@ function UL = UL_calc_solution(Tc1,Tc2,Tpm)
 while (1)
     Tc2=Tc2int;
     while (1)
-        disp(i)
+        % disp(i)
         Tc1=Tc1int;
         hrc2a=sigma.*epsilonc.*(Tc2+Ts).*(Tc2.^2+Ts.^2).*(Tc2-Ts)./(Tc2-Ta);
         hcc2a=hw;
@@ -72,9 +72,10 @@ while (1)
         Ut=(R1+R2+R3).^(-1);
 
         qloss=Ut.*(Tp-Ta);
-        Tc1=Tp-qloss./h3;
-        Tc2=Tc1-qloss./h2;
-        disp([Tc1, Tc2])
+        Tc1=real(Tp-qloss./h3);
+        Tc2=real(Tc1-qloss./h2);
+
+        % disp([Tc1, Tc2])
         if all(abs(Tc1-Tc1int)<conv)
             Tc1int=Tc1;
             break

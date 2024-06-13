@@ -17,8 +17,7 @@ function [n_c,kl,n_ri,L_back,k_back,L_cover,W,len_tube,diam_tube,len_collector,C
     U = 500;%overall heat exchanger coefficient
     eps_req = 0.85;%required effectiveness at every hour
 
-    %material properties of water at 300K from Basic Heat Transfer Table
-    %A.8
+    %material properties of water at 300K from Basic Heat Transfer Table A.8
     cp_w = 4178;% J/kgK
     rho_w = 996;%kg/m^3
     mu_w = 8.67e-4;%kg/m/s
