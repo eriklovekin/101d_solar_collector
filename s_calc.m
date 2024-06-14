@@ -126,14 +126,14 @@ function S = s_calc()
     clearS = clearIb.*Rb.*tau_alpha_b + clearId.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*clearI.*tau_alpha_g.*(1-cosd(beta)).*0.5;%5.9.1
     clearS = clearS/3600;
     % 
-    figure
-    hold on
-    plot(1:23,clearS,'b-')
-    plot(1:23,S,'r.','MarkerSize',20)
-    xlabel('Time [h]')
-    ylabel('S [W/m^2]')
-    legend('Clerasky', 'Measured')
-    xlim([1,24])
+    % figure
+    % hold on
+    % plot(1:23,clearS,'b-')
+    % plot(1:23,S,'r.','MarkerSize',20)
+    % xlabel('Time [h]')
+    % ylabel('S [W/m^2]')
+    % legend('Clerasky', 'Measured')
+    % xlim([1,24])
     % title('Absorbed Irradiation S Throughout June 21st, 2024')
 end
 
