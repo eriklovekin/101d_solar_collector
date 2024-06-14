@@ -6,8 +6,6 @@ function S = s_calc()
     data = extract_data();
     DHI = data(:,6);% Gd
     DNI = data(:,13);% Gb
-    clearDHI = data(:,8);
-    clearDNI = data(:,9);
     rho_g = data(:,17);%ground albedo
     zenith_sun = data(:,16);%solar zenith angle theta_z
     beta = data(12,16);%collector zenith angle at 12 noon (max DHI)
@@ -19,7 +17,7 @@ function S = s_calc()
     
     % 47.6205° N, 122.3493° W
     latitude = 47.6205;
-    longitude = -122.3493;
+    longitude = 122.3493;
     azimuth = 0;% collector azimuth straight south
     Gsc = 1367; % W/m^2
     
@@ -42,9 +40,10 @@ function S = s_calc()
     
     cosd_incidence_angle3 = cosd(zenith_sun)*cosd(beta) + sind(zenith_sun).*sind(beta).*cosd(azimuth_s - azimuth);%1.6.3 TODO: compare with 1.6.2
     incidence_angle = acosd(cosd_incidence_angle3);
-    % cosd_zenith_sun = cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%1.6.5
-    cosd_zenith_sun = cosd(zenith_sun);
-    Go = Gsc*(1 + 0.033*cosd(360*n_day/365)).*cosd(zenith_sun);%1.10.1
+    cosd_zenith_sun = cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%1.6.5
+    % cosd_zenith_sun = cosd(zenith_sun);
+    Go = Gsc*(1 + 0.033*cosd(360*n_day/365));%1.10.1
+    
     
     Id = DHI*3600;%diffuse
     Ib = DNI*3600;%beam
@@ -59,24 +58,14 @@ function S = s_calc()
         end
     end
 
-    clearId = clearDHI*3600;%diffuse
-    clearIb = clearDNI*3600;%beam
-    clearI = clearIb + clearId; %TODO: check
-    
-    clearAi = clearIb./Io;%DB 2.16.3 anisotropy index
-    clearf = sqrt(clearIb./clearI);%DB 2.16.6
-    for n = 1:length(clearf)
-        if isnan(clearf(n))
-            clearf(n) = 0;
-        end
-    end
-
     
     %% Ratio between incident radiation on horizontal and tilted surface
     % R_b1 = cosd_incidence_angle3./cosd(zenith_sun); %DB 1.8.1
-    R_b2 = (cosd(latitude-beta).*cosd(declination).*cosd(omega) + sind(latitude-beta).*sind(declination))...
-            ./ cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%DB 1.8.2 TODO: Doesn't match with 1.8.1
+    % R_b2 = (cosd(latitude-beta).*cosd(declination).*cosd(omega) + sind(latitude-beta).*sind(declination))...
+    %        ./ cosd(latitude).*cosd(declination).*cosd(omega) + sind(latitude).*sind(declination);%DB 1.8.2 TODO: Doesn't match with 1.8.1
+    R_b2 = 1./cosd_zenith_sun; % following austin's notes
     
+
     % Account for sun rise/set
     % a_rise = (sind(declination).*sind(latitude).*cosd(beta) - sind(declination).*cosd(latitude).*sind(beta).*cosd(azimuth)).*(omega2_rise-omega1_rise).*pi/180 ...
     %        + (cosd(declination).*cosd(latitude).*cosd(beta) + cosd(declination).*sind(latitude).*sind(beta).*cosd(azimuth)).*(sind(omega2_rise)-sind(omega1_rise)) ...
@@ -100,10 +89,10 @@ function S = s_calc()
     
     
     IT = (Ib+Id.*Ai).*Rb + Id.*(1-Ai).*(1+cosd(beta))*0.5.*(1+f.*sind(beta/2).^3) + I.*rho_g.*(1-cosd(beta))*0.5;%2.16.7
-    clearIT = (clearIb+clearId.*clearAi).*Rb + clearId.*(1-clearAi).*(1+cosd(beta))*0.5.*(1+clearf.*sind(beta/2).^3) + clearI.*rho_g.*(1-cosd(beta))*0.5;%2.16.7
+    
     %% Absorbtance and transmittance calcs
     %from HW2 P1, assume T = 400K 
-    % alpha_n = 0.944;%fig 4.8.3 plate absorbtance
+    alpha_n = 0.944;%fig 4.8.3 plate absorbtance
     alpha_n = 0.961;
     eps = 0.095;% DB 4.8.3 plate emissivity
     
@@ -120,21 +109,8 @@ function S = s_calc()
     tau_alpha_g = tau_alpha_n*0.36;% ground reflected using theta_eg
     tau_alpha_b = tau_alpha_n*[0;0;0;0;0;0.1;0.55;0.82;0.95;0.98;0.99;1;0.99;0.98;0.96;0.89;0.64;0.18;0;0;0;0;0];
     
-    S = Ib.*Rb.*tau_alpha_b + Id.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*I.*tau_alpha_g.*(1-cosd(beta)).*0.5;%5.9.1
+    S = Ib.*Rb.*tau_alpha_b + Id.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*I.*tau_alpha_g.*(1-cosd(beta)).*0.5; %5.9.1
+    % S = (Ib+Id.*Ai).*Rb.*tau_alpha_b+Id.*(1-Ai).*tau_alpha_d.*((1+cosd(beta))./2).*(1+f.*sind(beta./2).^3)+I.*rho_g.*tau_alpha_g.*((1-cosd(beta))./2)
     S = S/3600;
-
-    clearS = clearIb.*Rb.*tau_alpha_b + clearId.*tau_alpha_d.*(1+cosd(beta))*0.5 + rho_g.*clearI.*tau_alpha_g.*(1-cosd(beta)).*0.5;%5.9.1
-    clearS = clearS/3600;
-    % 
-    figure
-    hold on
-    plot(1:23,clearS,'b-')
-    plot(1:23,S,'r.','MarkerSize',20)
-    xlabel('Time [h]')
-    ylabel('S [W/m^2]')
-    legend('Clerasky', 'Measured')
-    xlim([1,24])
-    % title('Absorbed Irradiation S Throughout June 21st, 2024')
 end
-
 

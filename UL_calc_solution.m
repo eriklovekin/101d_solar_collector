@@ -11,13 +11,15 @@ function UL = UL_calc_solution(Tc1,Tc2,Tpm)
     Tc1int= Tc1;
     sigma=5.67e-8;%S-B constant;
     g=9.8;% gravitational const;
-    epsilonc=4.*n_ri./(n_ri+1).^2;% emissivity of cover glass; same for covers 1 and 2;
-    epsilonp=0.088;% emissiivty of plate. Figure 4.8.3, HW2p1
+    % epsilonc=4.*n_ri./(n_ri+1).^2;% emissivity of cover glass; same for covers 1 and 2;
+    epsilonc = 0.88; % value most commonly used in DB, couldn't find an equation
+    epsilonp=0.088;% emissivity of plate. Figure 4.8.3, HW2p1
     d = L_cover;
-    Pr = 0.7;% TODO: update with problem-specific value
+    Pr = 15.06/21.70;% used 3.11.1, looked up air constants with https://www.engineeringtoolbox.com/air-thermal-diffusivity-d_2011.html and https://www.engineeringtoolbox.com/air-absolute-kinematic-viscosity-d_601.html
     nu = 1.96e-5;% kinematic viscosity of air
     k=0.0293;% thermal conductivity of air
     angle = 25.9./180.*pi;%beta in radians
+    betaprime = 3.43e-3;
     for m = 1:length(V)
         hw(m,1) = max([5,8.6.*V(m).^0.6./len_collector.^0.4]);% DB 3.15.10
     end
@@ -50,21 +52,21 @@ while (1)
     while (1)
         % disp(i)
         Tc1=Tc1int;
-        hrc2a=sigma.*epsilonc.*(Tc2+Ts).*(Tc2.^2+Ts.^2).*(Tc2-Ts)./(Tc2-Ta);
+        hrc2a=sigma.*epsilonc.*(Tc2+Ts).*(Tc2.^2+Ts.^2).*(Tc2-Ts)./(Tc2-Ta); % 6.4.5
         hcc2a=hw;
         h1=hcc2a+hrc2a;
         R1=1./h1;
 
-        hrc1c2=sigma.*(Tc1.^4-Tc2.^4)./(Tc1-Tc2)./(1./epsilonc+1./epsilonc-1);
+        hrc1c2=sigma.*(Tc1.^4-Tc2.^4)./(Tc1-Tc2)./(1./epsilonc+1./epsilonc-1); % 6.4.3
         Rac1c2=g.*(Tc1-Tc2).*1./((Tc1+Tc2)./2).*d.^3.*Pr./nu.^2;
-        Nuc1c2=1+max(0,1.44.*(1-1708.*(sin(1.8.*angle)).^1.6./Rac1c2./cos(angle)).*(1-1708./Rac1c2./cos(angle)))+max(0,((Rac1c2.*cos(angle)./5830).^(1./3)-1));
+        Nuc1c2=1+max(0,1.44.*(1-1708.*(sin(1.8.*betaprime)).^1.6./Rac1c2./cos(betaprime)).*(1-1708./Rac1c2./cos(betaprime)))+max(0,((Rac1c2.*cos(betaprime)./5830).^(1./3)-1));
         hcc1c2=Nuc1c2.*k./d;
         h2=hcc1c2+hrc1c2;
         R2=1./h2;
 
         hrpc1=sigma.*(Tp.^4-Tc1.^4)./(Tp-Tc1)./(1./epsilonp+1./epsilonc-1);
         Rapc1=g.*(Tp-Tc1).*1./((Tp+Tc1)./2).*d.^3.*Pr./nu.^2;
-        Nupc1=1+max(0,1.44.*(1-1708.*(sin(1.8.*angle)).^1.6./Rapc1./cos(angle)).*(1-1708./Rapc1./cos(angle)))+max(0,((Rapc1.*cos(angle)./5830).^(1./3)-1));
+        Nupc1=1+max(0,1.44.*(1-1708.*(sin(1.8.*betaprime)).^1.6./Rapc1./cos(betaprime)).*(1-1708./Rapc1./cos(betaprime)))+max(0,((Rapc1.*cos(betaprime)./5830).^(1./3)-1));
         hcpc1=Nupc1.*k./d;
         h3=hcpc1+hrpc1;
         R3=1./h3;
