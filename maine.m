@@ -1,4 +1,6 @@
 % Main Loop
+clear all
+close all
 
 converged = 0.1;
 Tci = 20 + 273;% Heat exchanger cold side in temp
@@ -23,6 +25,7 @@ S = s_calc();
 
 while increase_area
     % Increase area
+    increase_area = false;
     n = n+1;
     disp(['n = ' num2str(n)])
     Ac = len_collector*n*W;
@@ -130,6 +133,8 @@ while increase_area
     end
 
     heated_volume = sum(m_dot_he./rho_w)*3600;
+    v_hourly(:,n-8) = m_dot_he./rho_w*3600*1000;
+    v_tot(n-8) = heated_volume*1000;
     hv_gal = heated_volume/0.00378541;
 
     disp(['Hot water produced: ', num2str(heated_volume), ' m^3 = ', num2str(hv_gal), ' gallons'])
@@ -139,6 +144,8 @@ while increase_area
 end
 disp(['Area of collector: ' num2str(Ac)])
 disp(['Number of tubes: ' num2str(n)])
+
+
 
 
 

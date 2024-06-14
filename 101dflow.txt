@@ -1,0 +1,38 @@
+While increase_area
+	increase tube number
+
+	set eps values to required
+
+	Assuming const T_sc_out, calc T_sc_in from HX equations
+	
+	Guess m_dot_sc, Tpm, Tc1 and Tc2
+
+	while m_dot_sc or Tpm not converged
+		calc UL @ Tpm
+		calc hfi @ m_dot_sc
+		calc m, F, F_prime
+		
+		update m_dot_sc 
+		
+		calc FR at new m_dot_sc
+		calc Qu
+		update Tpm
+
+		while m_dot_he not converged
+			calc m_dot_he from new m_dot_sc and eps
+			calc NTU
+			calc HX area
+			select maxA to maintain min effectiveness
+		
+			calc NTU from maxA
+			calc eps from updated NTU
+			update m_dot_he from eps
+
+		update T_sc_in with new eps frmo HX equations
+		update guesses for Tc1 and Tc2
+
+
+		
+		
+
+		  

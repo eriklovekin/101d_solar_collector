@@ -20,9 +20,10 @@ n = 1;% number of tubes
 increase_area = true;
 
 S = s_calc();
-
+for n = 8:10
 while increase_area
     % Increase area
+    increase_area = false;
     n = n+1;
     disp(['n = ' num2str(n)])
     Ac = len_collector*n*W;
@@ -62,12 +63,13 @@ while increase_area
         tmp2 = 1./(pi.*D.*hfi);
         F_prime = (1./UL)./(W.*(tmp1 + 1/Cb + tmp2));% DB 6.5.18
 
-        FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
-        for k = 1:length(FR)
-            if FR(k) < 0
-                FR(k) = 0;
-            end
-        end
+        % FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
+        % for k = 1:length(FR)
+        %     if FR(k) < 0
+        %         FR(k) = 0;
+        %     end
+        % end
+
         %% update m_dot_sc and Tpm
         m_dot_sc_old = m_dot_sc;
         Tpm_old = Tpm;
@@ -84,7 +86,13 @@ while increase_area
                 m_dot_sc(k) = 0;
             end
         end
-        
+
+        FR = m_dot_sc.*cp_w.*(T_sc_out-T_sc_in)./(Ac.*(S - UL.*(T_sc_in - Ta)));% DB 6.7.1
+        for k = 1:length(FR)
+            if FR(k) < 0
+                FR(k) = 0;
+            end
+        end
         Qu = Ac.*FR.*(S - UL.*(T_sc_in - Ta));% 6.7.6
         Tpm = T_sc_in + (Qu/Ac).*(1-FR)./(FR.*UL);% DB 6.9.4
         
@@ -99,15 +107,15 @@ while increase_area
         end
 
         %% Calculate Heat exchanger values 
-        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc);
+        [m_dot_he, Ahe, eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out);
         for k = 1:length(eps)
             if isnan(eps(k))
                 eps(k) = 1;
             end
         end
 
-        disp('     UL        hfi       m         F        F_prime    FR       Qu       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
-        disp([UL,hfi,m,F,F_prime,FR,Qu,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
+        disp('     UL        hfi       m         F        F_prime    FR       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
+        disp([UL,hfi,m,F,F_prime,FR,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
         % disp(['Ahe = ' num2str(Ahe)])
         % Check that initial assumption is met
         if m_dot_he < m_dot_sc
@@ -123,6 +131,8 @@ while increase_area
     end
 
     heated_volume = sum(m_dot_he./rho_w)*3600;
+    v_hourly(:,n-8) = m_dot_he./rho_w*3600;
+    v_tot(1,n-8) = heated_volume*1000;
     hv_gal = heated_volume/0.00378541;
 
     disp(['Hot water produced: ', num2str(heated_volume), ' m^3 = ', num2str(hv_gal), ' gallons'])
@@ -130,8 +140,14 @@ while increase_area
         increase_area = false;
     end
 end
+end
 disp(['Area of collector: ' num2str(Ac)])
 disp(['Number of tubes: ' num2str(n)])
+
+figure
+hold on
+plot([9,10,11],v_tot)
+plot([])
 
 
 
