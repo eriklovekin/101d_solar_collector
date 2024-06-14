@@ -17,7 +17,7 @@ function S = s_calc()
     
     % 47.6205° N, 122.3493° W
     latitude = 47.6205;
-    longitude = 122.3493;
+    longitude = -122.3493;
     azimuth = 0;% collector azimuth straight south
     Gsc = 1367; % W/m^2
     
