@@ -9,8 +9,8 @@ function [m_dot_he,maxA,eps] = mdot_and_A_he(eps,m_dot_sc,T_sc_out)
     i = 0;
     while any(abs(m_dot_he-m_dot_he_old) > 0.0001)
         i = i+1;
-        disp(['he loop ' num2str(i)])
-        disp(m_dot_he')
+        % disp(['he loop ' num2str(i)])
+        % disp(m_dot_he')
         Rc = m_dot_sc./m_dot_he; % BHT 8.34
         for k = 1:length(Rc)
                 if isnan(Rc(k))

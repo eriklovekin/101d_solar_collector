@@ -1,0 +1,34 @@
+figure
+    hold on
+    plot(1:23,clearS,'b-')
+    plot(1:23,S,'r.','MarkerSize',20)
+    xlabel('Time [h]')
+    ylabel('S [W/m^2]')
+    legend('Clerasky', 'Measured')
+    xlim([1,24])
+
+
+
+figure
+hold on
+plot(9,v_tot(1),'b.','MarkerSize',25)
+plot(10,v_tot(2),'go','LineWidth',3)
+plot(11,v_tot(3),'kx','LineWidth',3)
+yline(454,'k--')
+xlim([8.5,11.5])
+ylim([415,515])
+xlabel('Number of tubes')
+ylabel('Volume [liters]')
+legend('','','','Minimum volume requirement','Location','nw')
+hold off
+
+figure
+hold on
+plot(1:23,v_hourly(:,1),'b.','MarkerSize',25)
+plot(1:23,v_hourly(:,2),'go','LineWidth',3)
+plot(1:23,v_hourly(:,3),'kx','LineWidth',3)
+xlim([1,24])
+xlabel('Time [h]')
+ylabel('Volume [liters]')
+legend('9 tubes','10 tubes','11 tubes')
+hold off

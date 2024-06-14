@@ -25,9 +25,9 @@ S = s_calc();
 
 while increase_area
     % Increase area
-    increase_area = false;
     n = n+1;
-    disp(['n = ' num2str(n)])
+    % disp(['n = ' num2str(n)])
+
     Ac = len_collector*n*W;
 
     eps = eps_req*ones(23,1);% Reset effectiveness requirement to eps_req
@@ -51,7 +51,7 @@ while increase_area
     %% Based on initial guesses, calculate Tpm and m_dot in solar collector
     while any(abs(m_dot_sc-m_dot_sc_old) > converged) || any(abs(Tpm-Tpm_old) > converged)
         i = i + 1;
-        disp(i);
+        % disp(i);
         
         % UL = UL_calc(Tc1,Tc2,Tpm);
         UL = UL_calc_solution(Tc1,Tc2,Tpm);
@@ -108,8 +108,8 @@ while increase_area
                 eps(k) = 1;
             end
         end
-        disp('     UL        hfi       m         F        F_prime    FR       Qu       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
-        disp([UL,hfi,m,F,F_prime,FR,Qu,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
+        % disp('     UL        hfi       m         F        F_prime    FR       Qu       m_dot_he   m_dot_sc    Ahe       eps       Tpm')
+        % disp([UL,hfi,m,F,F_prime,FR,Qu,m_dot_he,m_dot_sc,Ahe*ones(size(eps)),eps,Tpm])
         % disp(['Ahe = ' num2str(Ahe)])
         % Check that initial assumption is met
         if m_dot_he < m_dot_sc
@@ -125,15 +125,16 @@ while increase_area
     end
 
     heated_volume = sum(m_dot_he./rho_w)*3600;
-    v_hourly(:,n-8) = m_dot_he./rho_w*3600*1000;
-    v_tot(n-8) = heated_volume*1000;
+    % v_hourly(:,n-8) = m_dot_he./rho_w*3600*1000;
+    % v_tot(n-8) = heated_volume*1000;
     hv_gal = heated_volume/0.00378541;
 
-    disp(['Hot water produced: ', num2str(heated_volume), ' m^3 = ', num2str(hv_gal), ' gallons'])
+    % disp(['Hot water produced: ', num2str(heated_volume), ' m^3 = ', num2str(hv_gal), ' gallons'])
     if heated_volume >= volume_min
         increase_area = false;
     end
 end
+disp(['Hot water produced: ', num2str(heated_volume), ' m^3 = ', num2str(hv_gal), ' gallons'])
 disp(['Area of collector: ' num2str(Ac)])
 disp(['Number of tubes: ' num2str(n)])
 
