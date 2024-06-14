@@ -108,6 +108,6 @@ end
 % Ut_back = L_back/k_back; % from 6.4.10, k/L
 Ut_back = k_back/L_back;
 UL = real(Ut_new+Ut_back);
-UL = Ut_new;% hw1 check
+UL = Ut_new';% hw1 check
 
 end
